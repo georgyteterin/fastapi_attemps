@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+import uvicorn
 
 
 
@@ -21,5 +22,5 @@ def filename(DDD: int, YY: int, n_or_g):
 def download_file():
   return FileResponse(path='cute cat.jpg', filename='картинка кота.jpeg')
 
-
-
+if __name__ == '__main__':
+    uvicorn.run(app, host='0.0.0.0', port=8000)
