@@ -11,8 +11,8 @@ app = FastAPI(
 # ЭТО ЧТОБЫ ПРОВЕРИТЬ ФОРМИРОВАНИЕ ДАТЫ ДЛЯ СКАЧИВАНИЯ ФАЙЛА ПО ЗАПРОСУ http://localhost:8000/filename/213-23-n
 # (естественно и дату и год и n/g можно менят, это из примера из воровского документа по эфемеридам))
 @app.get("/filename/{DDD}-{YY}-{n_or_g}")
-def filename(DDD: int, YY: int, n_or_g):
-    filename = "brdc"+DDD+"0."+YY+n_or_g
+def filename(DDD, YY, n_or_g):
+    filename = "brdc"+DDD+"0."+YY+n_or_g + ".txt"
     return {"зесь должно быть скачивание файла": filename}
 
 
@@ -22,5 +22,13 @@ def filename(DDD: int, YY: int, n_or_g):
 def download_file():
   return FileResponse(path='cute cat.jpg', filename='картинка кота.jpeg')
 
+
+@app.get("/download_file/{DDD}-{YY}-{n_or_g}")
+def download_file_by_name(DDD, YY, n_or_g):
+    filename = "brdc" + DDD + "0." + YY + n_or_g + ".jpg"
+    return FileResponse(path=filename, filename=filename)
+
+
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=8000)
+
