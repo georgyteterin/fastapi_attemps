@@ -38,6 +38,8 @@ def download_by_link(num: int):
         url = 'https://wallpapers.com/images/hd/cute-cats-pictures-ofp9qyt72qck6jqg.jpg'
     elif num == 3:
         url = 'https://schoharierecovery.org/wp-content/uploads/2020/09/2-2.jpg'
+    # elif num == 4:
+    #     url = 'https://cddis.nasa.gov/archive/gnss/data/daily/2023/brdc/brdc2120.23n.gz'
     else:
         return {"ссылка пока не добавлена"}
     # url = ['https://rockweek.ru/wp-content/uploads/2016/09/kiss_44.jpg',
@@ -46,11 +48,16 @@ def download_by_link(num: int):
     #        ]
     # r = requests.get(url[num - 1])
     r = requests.get(url)
-    with open(r'C:\Users\гоша\Documents\my_photos\picture.jpg', 'wb') as f:
+    # with open(r'C:\Users\гоша\Documents\my_photos\picture.jpg', 'wb') as f:
+    with open(r'picture.jpg', 'wb') as f:
         f.write(r.content)
-    path = r'C:\Users\гоша\Documents\my_photos\picture.jpg'
+    # path = r'C:\Users\гоша\Documents\my_photos\picture.jpg'
+    path = r'picture.jpg'
     filename = 'picture.jpg'
     return FileResponse(path=path, filename=filename)
+
+
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host='0.0.0.0', port=8000)

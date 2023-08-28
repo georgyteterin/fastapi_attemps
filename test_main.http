@@ -1,0 +1,23 @@
+GET http://localhost:8000/download_file/213-23-n
+Accept: application/json
+
+###
+GET http://localhost:8000/link/2
+Accept: application/json
+
+###
+GET http://localhost:8000/filename/211-245-n
+Accept: application/json
+
+###
+# Test your FastAPI endpoints
+
+GET http://127.0.0.1:8000/
+Accept: application/json
+
+###
+
+GET http://127.0.0.1:8000/hello/User
+Accept: application/json
+
+###
