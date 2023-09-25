@@ -41,9 +41,9 @@ class SessionWithHeaderRedirection(requests.Session):
 
 
 @app.get('/download/{year}/{DDD}-{n_or_g}')
-def get_file(year: int, DDD, n_or_g):
-    url = ("https://cddis.nasa.gov/archive/gnss/data/daily/" + str(year) + "/brdc/brdc"
-           + DDD + "0." + str(year % 100) + n_or_g + ".gz")
+def get_file(year, DDD, n_or_g):
+    url = ("https://cddis.nasa.gov/archive/gnss/data/daily/" + year + "/brdc/brdc"
+           + DDD + "0." + year[2:] + n_or_g + ".gz")
 
     session = SessionWithHeaderRedirection(USERNAME, PASSWORD)
     filename = url[url.rfind('/') + 1:]
