@@ -11,6 +11,9 @@ app = FastAPI(
     version="1"
 )
 
+USERNAME = "rokja"
+PASSWORD = "Par0lephemers!"
+
 class SessionWithHeaderRedirection(requests.Session):
     AUTH_HOST = 'urs.earthdata.nasa.gov'
 
@@ -39,17 +42,10 @@ class SessionWithHeaderRedirection(requests.Session):
 
 @app.get('/download/{year}/{DDD}-{n_or_g}')
 def get_file(year: int, DDD, n_or_g):
-    yy = str(year % 100)
     url = ("https://cddis.nasa.gov/archive/gnss/data/daily/" + str(year) + "/brdc/brdc"
-           + DDD + "0." + yy + n_or_g + ".gz")
+           + DDD + "0." + str(year % 100) + n_or_g + ".gz")
 
-
-    username = "rokja"
-    password = "Par0lephemers!"
-
-    session = SessionWithHeaderRedirection(username, password)
-
-
+    session = SessionWithHeaderRedirection(USERNAME, PASSWORD)
     filename = url[url.rfind('/') + 1:]
 
     try:
