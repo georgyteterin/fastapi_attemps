@@ -10,8 +10,9 @@ from pathlib import Path
 
 app = FastAPI(
     title="downloading ephemeris",
-    version="1"
+    version="1.1"
 )
+
 session = app_rocketry.session
 
 
@@ -58,7 +59,7 @@ def get_file(year, DDD, n_or_g):
     return FileResponse(path=local_filename, filename=local_filename)
 
 
-@app.get('/{n_or_g}')
+@app.get('/download/last/{n_or_g}')
 def send_file(n_or_g: str):
     path = Path(r"archive\\" + 'brdc' + f"{datetime.today().date():%j}" + '0.23'+n_or_g)
     yesterday = datetime.today() - timedelta(days=1)

@@ -82,30 +82,30 @@ def get_file(name_of_file):
         # print('url does not exist')
         return 404
 
-
 @app.task(every('300 seconds'))
 def do_things():
 
     check = get_data()
 
-    def compare(prev, filename):
+    def compare(filename):
         if get_file(filename) == 200:
-            if prev == check.get(filename):
-                print("no changes")
-            else:
-                get_file(filename)
-                with open('log.txt', 'a') as f:
-                    f.write(datetime.now().strftime("%H:%M:%S") + "    " + filename + "   " + check.get(filename) + "\n")
+            with open('log.txt') as f:
+                if check.get(filename) in f.read():
                     f.close()
-                # print('logged')
-                prev = check.get(filename)
-            return prev
+                    print("no changes")
+                else:
+                    get_file(filename)
+                    with open('log.txt', 'a') as r:
+                        r.write(datetime.today().strftime("%d-%m-%Y") + "    " + datetime.now().strftime("%H:%M:%S") +
+                                "    " + filename + "   " + check.get(filename) + "\n")
+                        r.close()
+                    # print('logged')
 
-    prev_nav = compare(PREV_NAV, n_name)
-    prev_glo = compare(PREV_GLO, g_name)
+    compare(n_name)
+    compare(g_name)
 
-# time.sleep(20)
 
-#
-if __name__ == '__main__':
-    app.run()
+
+
+# if __name__ == '__main__':
+#     app.run()
