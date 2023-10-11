@@ -1,22 +1,21 @@
+import os
 from datetime import datetime
 from bs4 import BeautifulSoup
 from libra import SessionWithHeaderRedirection as redirectionClass
 from libra import dearch
 from rocketry import Rocketry
 from rocketry.conds import every
+from pathlib import Path
 
 app = Rocketry()
 
-
 USERNAME = "rokja"
 PASSWORD = "Par0lephemers!"
-PREV_GLO = ''
-PREV_NAV = ''
-
+prev_glo = ''
+prev_nav = ''
 
 g_name = 'brdc' + f"{datetime.today().date():%j}" + '0.23g.gz'
 n_name = 'brdc' + f"{datetime.today().date():%j}" + '0.23n.gz'
-
 
 
 def get_data():
@@ -63,10 +62,16 @@ def get_file(name_of_file):
     session = redirectionClass(USERNAME, PASSWORD)
     filename = url[url.rfind('/') + 1:]
 
+
+    if os.path.isdir(r"archive\\"):
+        pass
+    else:
+        os.mkdir(r"archive\\")
+
     try:
         response = session.get(url, stream=True)
 
-        print(response.status_code)
+        # print(response.status_code)
         response.raise_for_status()
         with open(filename, 'wb') as fd:
             for chunk in response.iter_content(chunk_size=1024 * 1024):
@@ -75,6 +80,7 @@ def get_file(name_of_file):
         local_filename = r"archive\\" + filename.removesuffix('.gz')
 
         dearch(filename, local_filename)
+        os.remove(filename)
         return response.status_code
     # except requests.exceptions.HTTPError as e:
     #     print(e)
@@ -82,30 +88,36 @@ def get_file(name_of_file):
         # print('url does not exist')
         return 404
 
+
 @app.task(every('300 seconds'))
 def do_things():
-
     check = get_data()
 
     def compare(filename):
         if get_file(filename) == 200:
-            with open('log.txt') as f:
+            with open(r"log.txt") as f:
                 if check.get(filename) in f.read():
                     f.close()
                     print("no changes")
                 else:
                     get_file(filename)
-                    with open('log.txt', 'a') as r:
+                    with open(r"log.txt", 'a') as r:
                         r.write(datetime.today().strftime("%d-%m-%Y") + "    " + datetime.now().strftime("%H:%M:%S") +
                                 "    " + filename + "   " + check.get(filename) + "\n")
                         r.close()
-                    # print('logged')
+                    print("got new data")
+        else:
+            print("some problems with downloading")
 
-    compare(n_name)
-    compare(g_name)
+    if os.path.isfile(r"log.txt"):
+        compare(n_name)
+        compare(g_name)
+    else:
+        with open(r"log.txt", "w") as p:
+            p.close()
+        compare(n_name)
+        compare(g_name)
 
 
-
-
-# if __name__ == '__main__':
-#     app.run()
+if __name__ == '__main__':
+    app.run()
