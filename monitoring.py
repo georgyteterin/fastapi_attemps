@@ -63,21 +63,20 @@ def get_file(name_of_file):
     filename = url[url.rfind('/') + 1:]
 
 
-    if os.path.isdir(r"archive\\"):
+    if os.path.isdir(r"archive"):
         pass
     else:
-        os.mkdir(r"archive\\")
+        os.mkdir(r"archive")
 
     try:
         response = session.get(url, stream=True)
-
         # print(response.status_code)
         response.raise_for_status()
         with open(filename, 'wb') as fd:
             for chunk in response.iter_content(chunk_size=1024 * 1024):
                 fd.write(chunk)
 
-        local_filename = r"archive\\" + filename.removesuffix('.gz')
+        local_filename = os.path.join("archive", filename.removesuffix('.gz'))
 
         dearch(filename, local_filename)
         os.remove(filename)

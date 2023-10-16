@@ -1,0 +1,14 @@
+__pycache__/
+.idea/
+build/
+venv/
+archive/
+dl_year/
+
+*.jpg
+Dockerfile
+*.spec
+*.txt
+*.pyc
+*.gz
+

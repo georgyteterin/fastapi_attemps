@@ -39,7 +39,7 @@ def get_file(year, DDD, n_or_g):
            + DDD + "0." + year[2:] + n_or_g + ".gz")
 
     session = redirectionClass(USERNAME, PASSWORD)
-    filename = r"dl_year\\" + url[url.rfind('/') + 1:]
+    filename = os.path.join("dl_year", url[url.rfind('/') + 1:])
 
 
     try:
@@ -47,10 +47,10 @@ def get_file(year, DDD, n_or_g):
         response = session.get(url, stream=True)
         print(response.status_code)
         response.raise_for_status()
-        if os.path.isdir(r"dl_year\\"):
+        if os.path.isdir(r"dl_year"):
             pass
         else:
-            os.mkdir(r"dl_year\\")
+            os.mkdir(r"dl_year")
 
         with open(filename, 'wb') as fd:
 
@@ -69,9 +69,9 @@ def get_file(year, DDD, n_or_g):
 
 @app.get('/download/last/{n_or_g}')
 def send_file(n_or_g: str):
-    path = r"archive\\" + 'brdc' + f"{datetime.today().date():%j}" + '0.23'+n_or_g
+    path = os.path.join("archive", 'brdc' + f"{datetime.today().date():%j}" + '0.23'+n_or_g)
     yesterday = datetime.today() - timedelta(days=1)
-    yesterday_path = Path(r"fastapi_attemps\archive\\" + 'brdc' + f"{yesterday.date():%j}" + '0.23'+n_or_g)
+    yesterday_path = os.path.join("archive", 'brdc' + f"{yesterday.date():%j}" + '0.23'+n_or_g)
     if os.path.isfile(path):
         return FileResponse(path, filename='brdc' + f"{datetime.today().date():%j}" + '0.23'+n_or_g)
     elif os.path.isfile(yesterday_path):
