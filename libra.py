@@ -40,14 +40,15 @@ def dearch(archive_name, local_filename):
 
 
 def check_dir(dir_name):
-    if os.path.isdir(r"archive"):
-        if os.path.isdir(r"archive/" + dir_name):
+    dir_name = os.path.join("archive", dir_name)
+    if os.path.isdir("archive"):
+        if os.path.isdir(dir_name):
             pass
         else:
-            os.mkdir(r"archive/" + dir_name)
+            os.mkdir(dir_name)
     else:
         os.mkdir(r"archive")
-        os.mkdir(r"archive/" + dir_name)
+        os.mkdir(dir_name)
 
 
 def check_file(file_name):

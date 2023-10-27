@@ -18,5 +18,3 @@ def get_actual_info(g_n_all):
         return response
     else:
         return False
-
-get_actual_info('n')
