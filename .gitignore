@@ -11,4 +11,9 @@ Dockerfile
 *.txt
 *.pyc
 *.gz
+*.html
+*.23n
+*.23g
+*.bash_history
+*.config/git/gitk
 

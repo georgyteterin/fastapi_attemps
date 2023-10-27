@@ -2,10 +2,9 @@ import os
 from datetime import datetime
 from bs4 import BeautifulSoup
 from libra import SessionWithHeaderRedirection as redirectionClass
-from libra import dearch
+from libra import dearch, check_dir, check_file
 from rocketry import Rocketry
 from rocketry.conds import every
-from pathlib import Path
 
 app = Rocketry()
 
@@ -14,8 +13,12 @@ PASSWORD = "Par0lephemers!"
 prev_glo = ''
 prev_nav = ''
 
-g_name = 'brdc' + f"{datetime.today().date():%j}" + '0.23g.gz'
-n_name = 'brdc' + f"{datetime.today().date():%j}" + '0.23n.gz'
+current = datetime.now()
+current_day = f"{datetime.today().date():%j}"
+
+g_name = 'brdc' + current_day + '0.23g.gz'
+n_name = 'brdc' + current_day + '0.23n.gz'
+log_name = os.path.join("archive", "logs", "log.txt")
 
 
 def get_data():
@@ -62,29 +65,25 @@ def get_file(name_of_file):
     session = redirectionClass(USERNAME, PASSWORD)
     filename = url[url.rfind('/') + 1:]
 
-
-    if os.path.isdir(r"archive"):
-        pass
-    else:
-        os.mkdir(r"archive")
+    check_dir("dl_daily")
 
     try:
         response = session.get(url, stream=True)
         # print(response.status_code)
         response.raise_for_status()
+        filename = os.path.join("archive", "dl_daily", filename)
         with open(filename, 'wb') as fd:
             for chunk in response.iter_content(chunk_size=1024 * 1024):
                 fd.write(chunk)
+            fd.close()
 
-        local_filename = os.path.join("archive", filename.removesuffix('.gz'))
-
+        local_filename = filename.removesuffix('.gz')
         dearch(filename, local_filename)
         os.remove(filename)
         return response.status_code
     # except requests.exceptions.HTTPError as e:
     #     print(e)
     except:
-        # print('url does not exist')
         return 404
 
 
@@ -94,19 +93,22 @@ def do_things():
 
     def compare(filename):
         if get_file(filename) == 200:
-            with open(r"log.txt") as f:
+            check_dir("logs")
+            check_file(log_name)
+            with open(log_name) as f:
                 if check.get(filename) in f.read():
                     f.close()
                     print("no changes")
                 else:
                     get_file(filename)
-                    with open(r"log.txt", 'a') as r:
+                    with open(log_name, 'a') as r:
                         r.write(datetime.today().strftime("%d-%m-%Y") + "    " + datetime.now().strftime("%H:%M:%S") +
                                 "    " + filename + "   " + check.get(filename) + "\n")
                         r.close()
                     print("got new data")
         else:
-            print("some problems with downloading")
+            # return 500
+            print('someting went wrong while downloading')
 
     if os.path.isfile(r"log.txt"):
         compare(n_name)
