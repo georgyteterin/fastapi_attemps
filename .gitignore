@@ -17,3 +17,5 @@ Dockerfile
 *.bash_history
 *.config/git/gitk
 
+гоша/.config/git
+
