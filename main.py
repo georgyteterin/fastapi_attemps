@@ -1,8 +1,8 @@
 import asyncio
 import uvicorn
-
 from api import app as app_fastapi
 from monitoring import app as app_monitoring
+from server_settings import LOGGING_CONFIG
 
 
 class Server(uvicorn.Server):
@@ -12,7 +12,8 @@ class Server(uvicorn.Server):
 
 
 async def main():
-    server = Server(config=uvicorn.Config(app_fastapi, host='0.0.0.0', port=8000, workers=1, loop="asyncio"))
+    server = Server(config=uvicorn.Config(app_fastapi, host='0.0.0.0', port=8000, workers=1, loop="asyncio",
+                                          log_config=LOGGING_CONFIG, log_level="info"))
 
     api = asyncio.create_task(server.serve())
     monitoring = asyncio.create_task(app_monitoring.serve())

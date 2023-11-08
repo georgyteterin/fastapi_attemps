@@ -5,6 +5,9 @@ from libra import SessionWithHeaderRedirection as redirectionClass
 from libra import dearch, check_dir, check_file
 from rocketry import Rocketry
 from rocketry.conds import every
+import logging.config
+
+logger = logging.getLogger("monitoring")
 
 app = Rocketry()
 
@@ -18,7 +21,7 @@ current_day = f"{datetime.today().date():%j}"
 
 g_name = 'brdc' + current_day + '0.23g.gz'
 n_name = 'brdc' + current_day + '0.23n.gz'
-log_name = os.path.join("archive", "logs", "log.txt")
+log_name = os.path.join("archive", "rinex_logs", "rinex_log.txt")
 
 
 def get_data():
@@ -93,28 +96,31 @@ def do_things():
 
     def compare(filename):
         if get_file(filename) == 200:
-            check_dir("logs")
+            check_dir("rinex_logs")
             check_file(log_name)
             with open(log_name) as f:
                 if check.get(filename) in f.read():
                     f.close()
-                    print("no changes")
+                    # print("no changes")
+                    logger.info("no changes")
                 else:
                     get_file(filename)
                     with open(log_name, 'a') as r:
                         r.write(datetime.today().strftime("%d-%m-%Y") + "    " + datetime.now().strftime("%H:%M:%S") +
                                 "    " + filename + "   " + check.get(filename) + "\n")
                         r.close()
-                    print("got new data")
+                    # print("got new data")
+                    logger.info("got new data: " + filename.removesuffix('.gz'))
         else:
             # return 500
-            print('someting went wrong while downloading')
+            # print('someting went wrong while downloading')
+            logger.info("something went wrong while downloading")
 
-    if os.path.isfile(r"log.txt"):
+    if os.path.isfile(r"rinex_log.txt"):
         compare(n_name)
         compare(g_name)
     else:
-        with open(r"log.txt", "w") as p:
+        with open(r"rinex_log.txt", "w") as p:
             p.close()
         compare(n_name)
         compare(g_name)
