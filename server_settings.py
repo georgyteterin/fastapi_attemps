@@ -46,6 +46,11 @@ LOGGING_CONFIG = {
             "handlers": ["stream_handler", "file_handler"],
             "level": "DEBUG",
             "propagate": True,
+        },
+        "rinex_merger": {
+            "handlers": ["stream_handler", "file_handler"],
+            "level": "DEBUG",
+            "propagate": True,
         }
     }
 }

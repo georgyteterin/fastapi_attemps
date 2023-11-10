@@ -18,3 +18,26 @@ def get_actual_info(g_n_all):
         return response
     else:
         return False
+
+
+def get_actual_highrate_filepath(gnss):
+    gnss_type = {
+        "n": "gps",
+        "g": "glo",
+        "l": "gal",
+        "f": "bds",
+    }
+    filepath = ""
+    files_folder = os.path.join("archive", "dl_highrate", gnss_type[gnss])
+    if os.path.exists(files_folder):
+        # find the last file
+        list_of_files = [os.path.join(files_folder, f) for f in os.listdir(files_folder) if os.path.isfile(os.path.join(files_folder, f))]
+        latest_file = max(list_of_files, key=os.path.getctime)
+        name = os.path.basename(latest_file)
+        filepath = os.path.join(files_folder, name)
+        return filepath
+    else:
+        return False
+
+
+

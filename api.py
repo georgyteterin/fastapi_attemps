@@ -1,3 +1,4 @@
+import math
 import os.path
 import os
 from fastapi import FastAPI, HTTPException
@@ -6,9 +7,10 @@ import requests
 from libra import SessionWithHeaderRedirection as redirectionClass
 from libra import dearch, check_dir
 from monitoring import app as app_rocketry
-from datetime import datetime
-from actual_data import get_actual_info
+from datetime import datetime, time
+from actual_data import get_actual_info, get_actual_highrate_filepath
 import glob
+import time
 
 
 
@@ -99,6 +101,51 @@ def send_actual_info(g_n_all):
         raise HTTPException(status_code=404)
     else:
         return get_actual_info(g_n_all)
+
+
+@app.get('/download/last/highrate/{g_n_l_f}')
+def send_highrate_file(g_n_l_f):
+    gnss_type = {
+        "n": "gps",
+        "g": "glo",
+        "l": "gal",
+        "f": "bds",
+    }
+
+    if g_n_l_f != "n":
+        raise HTTPException(status_code=404, detail="This GNSS is not supported yet.")
+        return
+
+    filepath = get_actual_highrate_filepath(g_n_l_f)
+    if filepath:
+        name = os.path.basename(filepath)
+        if os.path.isfile(filepath):
+            return FileResponse(filepath, filename=name)
+        else:
+            raise HTTPException(status_code=404, detail="Item is not a file")
+    else:
+        raise HTTPException(status_code=404, detail="Item is not ready or exist")
+
+
+@app.get('/actual/highrate/{g_n_l_f}')
+def send_actual_highrate_info(g_n_l_f):
+    if g_n_l_f != "n":
+        raise HTTPException(status_code=404, detail="This GNSS is not supported yet.")
+
+    filepath = get_actual_highrate_filepath(g_n_l_f)
+    if filepath:
+        name = os.path.basename(filepath)
+        size_kb = str(math.ceil(os.path.getsize(filepath) / 1024)) + 'Kb'
+        update_time = os.path.getmtime(filepath)
+        modificationTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(update_time))
+        response = ("Name: " + name + ';' + "Gnss: " + g_n_l_f + ';' + "Size: " + size_kb + ';' +
+                    "Last Update DateTime: " + modificationTime + ';')
+        return response
+    else:
+        raise HTTPException(status_code=404, detail="Item not ready or exist")
+
+
+
 
 # if __name__ == '__main__':
 #     uvicorn.run(app, host='0.0.0.0', port=8000)
