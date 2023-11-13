@@ -205,23 +205,26 @@ def do_custom():
         session.close()
 
         # Обработка ринекс файлов для gnss
-        for gnss in ["gps"]:  # ["gps", "glo", "gal", "bds"]:
-            rinex_merger.merge_files(gnss)
+        logger.info(f"Merging files has started")
+        rinex_merger.merge_files(gnss)
+        logger.info(f"Merging files has finished")
+
+        # После обработки по всем системам почистить папку с кучей файлов
+        all_files = [f for f in os.listdir(download_folder) if os.path.isfile(os.path.join(download_folder, f))]
+        gnss_files = [f for f in all_files if gnss_abbrev[gnss].lower() + ".rnx" in f.lower()]
+
+        for file_path in gnss_files:
+            try:
+                os.remove(os.path.join(download_folder, file_path))
+                # print(f"Файл {file_path} удален успешно.")
+            except Exception as e:
+                # print(f"Ошибка при удалении файла {file_path}: {e}")
+                logger.error(f"Ошибка при удалении файла {file_path}: {e}")
+        logger.info(f"Downloaded {gnss.upper()} files are cleaned.")
 
     # <---Окончание цикла по ГНСС
 
-    # После обработки по всем системам почистить папку с кучей файлов
-    files = os.listdir(download_folder)
-    file_paths = [os.path.join(download_folder, file) for file in files]
-    for file_path in file_paths:
-        try:
-            os.remove(file_path)
-            # print(f"Файл {file_path} удален успешно.")
-        except Exception as e:
-            # print(f"Ошибка при удалении файла {file_path}: {e}")
-            logger.error(f"Ошибка при удалении файла {file_path}: {e}")
 
-    logger.info(f"Download folder {download_folder} is cleaned.")
 
 
 if __name__ == '__main__':
