@@ -29,6 +29,9 @@ class RinexMerger:
             'gal': 'EN',
             'bds': 'CN'
         }
+        # Определяем парсер для ГНСС
+        parser = self.parsers[gnss_type]()
+
         all_files = [f for f in os.listdir(self.input_files_dir) if os.path.isfile(os.path.join(self.input_files_dir, f))]
         gnss_files = [f for f in all_files if gnss_abbreviature[gnss_type].lower() + ".rnx" in f.lower()]
 
@@ -41,7 +44,6 @@ class RinexMerger:
             # print("Reading file: " + file)
             # logger.debug()
             filepath = os.path.join(self.input_files_dir, file)
-            parser = self.parsers[gnss_type]()
 
             # Парсинг заголовка ринекс-файла
             df = parser.parse_header(filepath)
@@ -57,7 +59,11 @@ class RinexMerger:
             result_df_sv_data = pd.concat([result_df_sv_data, df], ignore_index=True)
 
         # Обработка результирующего DataFrame с данными заголовков файлов
-        result_df_header_data.dropna(subset=['GPSA', 'GPSB', 'GPUT'], how='all', inplace=True)
+        # result_df_header_data.dropna(subset=['GPSA', 'GPSB', 'GPUT'], how='all', inplace=True)
+        sub_columns = parser.get_columns_subset()
+        if set(sub_columns).issubset(result_df_header_data.columns):
+            result_df_header_data.dropna(subset=sub_columns, how='all', inplace=True)
+
         result_df_header_data = result_df_header_data.sort_values(by='datetime_utc', ascending=False)
         result_df_header_data = result_df_header_data.bfill()
         result_df_header_data = result_df_header_data.ffill()
@@ -79,7 +85,6 @@ class RinexMerger:
         parser = self.parsers[gnss_type]()
         output_name = parser.write_to_rinex_file(self.output_files_dir, header_data_frame, sv_data_frame)
         logger.info(f"Merged RINEX file for {gnss_type.upper()} is ready: {output_name} ")
-
 
 if __name__ == '__main__':
     input_files_dir = "Highrate_296d_15h"
