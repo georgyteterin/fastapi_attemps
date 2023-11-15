@@ -72,10 +72,8 @@ def get_file(name_of_file):
 
     check_dir("dl_daily")
 
-    try:
-        response = session.get(url, stream=True)
-        # print(response.status_code)
-        response.raise_for_status()
+    response = session.get(url, stream=True)
+    if response.status_code == 200:
         filename = os.path.join("archive", "dl_daily", filename)
         with open(filename, 'wb') as fd:
             for chunk in response.iter_content(chunk_size=1024 * 1024):
@@ -85,11 +83,9 @@ def get_file(name_of_file):
         local_filename = filename.removesuffix('.gz')
         dearch(filename, local_filename)
         os.remove(filename)
+        return response.status_code, url
+    else:
         return response.status_code
-    # except requests.exceptions.HTTPError as e:
-    #     print(e)
-    except:
-        return 404
 
 
 
@@ -99,26 +95,25 @@ def do_things():
     check = get_data()
 
     def compare(filename):
-        if get_file(filename) == 200:
+        status, link = get_file(filename)
+        if status == 200:
             check_dir("rinex_logs")
             check_file(log_name)
             with open(log_name) as f:
                 if check.get(filename) in f.read():
-                    f.close()
-                    # print("no changes")
-                    logger.info("no changes")
+                    logger.info("no changes in rinex log")
                 else:
+                    logger.info(f"downloading brdc file from {link}")
                     get_file(filename)
                     with open(log_name, 'a') as r:
                         r.write(datetime.today().strftime("%d-%m-%Y") + "    " + datetime.now().strftime("%H:%M:%S") +
                                 "    " + filename + "   " + check.get(filename) + "\n")
                         r.close()
-                    # print("got new data")
-                    logger.info("got new data: " + filename.removesuffix('.gz'))
+                    logger.info(f"got new data: {filename.removesuffix('.gz')}")
+        elif status == 404:
+            logger.info(f"there is no file called {filename} on CDDIS")
         else:
-            # return 500
-            # print('someting went wrong while downloading')
-            logger.info("something went wrong while downloading")
+            logger.info(f"there are some problems with downloading from CDDIS, response status is {status}")
 
     if os.path.isfile(r"rinex_log.txt"):
         compare(n_name)

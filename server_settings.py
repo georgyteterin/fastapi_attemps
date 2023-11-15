@@ -13,7 +13,7 @@ LOGGING_CONFIG = {
 
     'formatters': {
         'default_formatter': {
-            'format': '[%(levelname)s:%(asctime)s %(name)s] %(message)s'
+            'format': '[%(levelname)s:%(asctime)s %(module)s] %(message)s'
         },
     },
 
@@ -28,16 +28,23 @@ LOGGING_CONFIG = {
             'level': 'DEBUG',
             'filename': logname,
             'formatter': 'default_formatter',
-        }
+        },
     },
 
     'loggers': {
         "uvicorn.access": {
+            "name": "uvicorn",
             "handlers": ["stream_handler", "file_handler"],
             "level": "DEBUG",
             "propagate": True,
         },
         "uvicorn.error": {
+            "name": "uvicorn",
+            "handlers": ["stream_handler", "file_handler"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "api": {
             "handlers": ["stream_handler", "file_handler"],
             "level": "DEBUG",
             "propagate": True,
