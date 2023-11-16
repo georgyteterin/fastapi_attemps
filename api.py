@@ -122,7 +122,7 @@ def send_highrate_file(g_n_l_f):
         "f": "bds",
     }
 
-    if g_n_l_f not in ["n", "g"]:
+    if g_n_l_f not in ["n", "g", "l", "f"]:
         raise HTTPException(status_code=404, detail="This GNSS is not supported yet.")
         return
 
@@ -139,7 +139,7 @@ def send_highrate_file(g_n_l_f):
 
 @app.get('/actual/highrate/{g_n_l_f}')
 def send_actual_highrate_info(g_n_l_f):
-    if g_n_l_f not in ["n", "g"]:
+    if g_n_l_f not in ["n", "g", "l", "f"]:
         raise HTTPException(status_code=404, detail="This GNSS is not supported yet.")
 
     filepath = get_actual_highrate_filepath(g_n_l_f)

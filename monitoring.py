@@ -143,7 +143,7 @@ def do_custom():
     url = ""
 
     # Цикл по ГНСС
-    for gnss in ["gps", "glo"]:    # ["gps", "glo", "gal", "bds"]
+    for gnss in ["gps", "glo", "gal", "bds"]:
         # До обработки по всем системам почистить папку с кучей файлов
         all_files = [f for f in os.listdir(download_folder) if os.path.isfile(os.path.join(download_folder, f))]
         gnss_files = [f for f in all_files if gnss_abbrev[gnss].lower() + ".rnx" in f.lower()]
