@@ -271,7 +271,6 @@ class GLONASSRinexParser(BaseRinexParser):
                 sat_data["datetime_utc"] = datetime(sat_data["YYYY"], sat_data["MM"], sat_data["DD"], sat_data["hh"], sat_data["mm"], sat_data["ss"])
                 sat_data["FloatList"] = [float(line[23:42].strip()), float(line[42:61].strip()), float(line[61:80].strip())]
 
-
                 # Чтение строк 2-4
                 for i in range(2, 5):
                     line = replace_D_to_E(file.readline())
@@ -439,7 +438,7 @@ class GalileoRinexParser(BaseRinexParser):
 
         with open(filename, 'w') as file:
             # WRITE HEADER INFO
-            line = f"     3.04           N: GNSS NAV DATA    G: GALILEO          RINEX VERSION / TYPE"
+            line = f"     3.04           N: GNSS NAV DATA    E: GALILEO          RINEX VERSION / TYPE"
             file.write(line + "\n")
 
             tmp = header_data_frame.head(1)['datetime_utc'].iloc[0].strftime('%Y%m%d %H%M%S')
