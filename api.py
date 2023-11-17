@@ -11,6 +11,7 @@ from datetime import datetime, time
 from actual_data import get_actual_info, get_actual_highrate_filepath
 import glob
 import time
+import logging.config
 
 
 
@@ -22,6 +23,8 @@ app = FastAPI(
 )
 
 session = app_rocketry.session
+
+logger = logging.getLogger("api")
 
 
 USERNAME = "rokja"
@@ -54,30 +57,37 @@ def get_file(year, DDD: str, n_or_g):
 
 
     session = redirectionClass(USERNAME, PASSWORD)
-    filename = os.path.join("archive/dl_year", url[url.rfind('/') + 1:])
+    filename = os.path.join("archive/dl_year".replace("/", os.sep), url[url.rfind('/') + 1:])
     local_filename = filename.removesuffix('.gz')
 
     if os.path.exists(local_filename):
+        logger.info(f"sending file '{local_filename[local_filename.rfind(os.sep) + 1:]}' to client")
         return FileResponse(path=local_filename, filename=local_filename)
     else:
-        try:
-            response = session.get(url, stream=True)
-            # print(response.status_code)
-            response.raise_for_status()
+        response = session.get(url, stream=True)
+
+        if response.status_code == 200:
             check_dir("dl_year")
 
+            logger.info(f"downloading file '{filename[filename.rfind(os.sep) + 1:]}'")
             with open(filename, 'wb') as fd:
-
                 for chunk in response.iter_content(chunk_size=1024 * 1024):
                     fd.write(chunk)
 
-        except requests.exceptions.HTTPError as e:
-            print(e)
+            logger.info(f"unzipping '{filename[filename.rfind(os.sep) + 1:]}' to '{local_filename[local_filename.rfind(os.sep) + 1:]}'")
+            dearch(filename, local_filename)
+            os.remove(filename)
 
-        dearch(filename, local_filename)
-        os.remove(filename)
-
-        return FileResponse(path=local_filename, filename=local_filename)
+            logger.info(f"sending file '{local_filename[local_filename.rfind(os.sep) + 1:]}' to client")
+            return FileResponse(path=local_filename, filename=local_filename)
+        elif response.status_code == 404:
+            logger.info(f"there is no file {filename[filename.rfind(os.sep) + 1:]} on CDDIS")
+            return f"there is no file {filename[filename.rfind(os.sep) + 1:]} on CDDIS"
+        else:
+            logger.info(f"there are troubles with getting {filename[filename.rfind(os.sep) + 1:]}, "
+                        f"response code {response.status_code}")
+            return (f"there are troubles with getting {filename[filename.rfind(os.sep) + 1:]}, "
+                    f"response code {response.status_code}")
 
 
 @app.get('/download/last/{n_or_g}')
@@ -92,7 +102,7 @@ def send_file(n_or_g: str):
         else:
             raise HTTPException(status_code=404, detail="Item not found")
     else:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Archive is empty")
 
 
 @app.get('/actual/{g_n_all}')
@@ -112,7 +122,7 @@ def send_highrate_file(g_n_l_f):
         "f": "bds",
     }
 
-    if g_n_l_f not in ["n", "g"]:
+    if g_n_l_f not in ["n", "g", "l", "f"]:
         raise HTTPException(status_code=404, detail="This GNSS is not supported yet.")
         return
 
@@ -129,7 +139,7 @@ def send_highrate_file(g_n_l_f):
 
 @app.get('/actual/highrate/{g_n_l_f}')
 def send_actual_highrate_info(g_n_l_f):
-    if g_n_l_f not in ["n", "g"]:
+    if g_n_l_f not in ["n", "g", "l", "f"]:
         raise HTTPException(status_code=404, detail="This GNSS is not supported yet.")
 
     filepath = get_actual_highrate_filepath(g_n_l_f)
