@@ -64,30 +64,36 @@ def get_file(year, DDD: str, n_or_g):
         logger.info(f"sending file '{local_filename[local_filename.rfind(os.sep) + 1:]}' to client")
         return FileResponse(path=local_filename, filename=local_filename)
     else:
-        response = session.get(url, stream=True)
+        try:
+            response = session.get(url, stream=True)
 
-        if response.status_code == 200:
-            check_dir("dl_year")
+            if response.status_code == 200:
+                check_dir("dl_year")
 
-            logger.info(f"downloading file '{filename[filename.rfind(os.sep) + 1:]}'")
-            with open(filename, 'wb') as fd:
-                for chunk in response.iter_content(chunk_size=1024 * 1024):
-                    fd.write(chunk)
+                logger.info(f"downloading file '{filename[filename.rfind(os.sep) + 1:]}'")
+                with open(filename, 'wb') as fd:
+                    for chunk in response.iter_content(chunk_size=1024 * 1024):
+                        fd.write(chunk)
 
-            logger.info(f"unzipping '{filename[filename.rfind(os.sep) + 1:]}' to '{local_filename[local_filename.rfind(os.sep) + 1:]}'")
-            dearch(filename, local_filename)
-            os.remove(filename)
+                logger.info(f"unzipping '{filename[filename.rfind(os.sep) + 1:]}' to '{local_filename[local_filename.rfind(os.sep) + 1:]}'")
+                dearch(filename, local_filename)
+                os.remove(filename)
 
-            logger.info(f"sending file '{local_filename[local_filename.rfind(os.sep) + 1:]}' to client")
-            return FileResponse(path=local_filename, filename=local_filename)
-        elif response.status_code == 404:
-            logger.info(f"there is no file {filename[filename.rfind(os.sep) + 1:]} on CDDIS")
-            return f"there is no file {filename[filename.rfind(os.sep) + 1:]} on CDDIS"
-        else:
-            logger.info(f"there are troubles with getting {filename[filename.rfind(os.sep) + 1:]}, "
+                logger.info(f"sending file '{local_filename[local_filename.rfind(os.sep) + 1:]}' to client")
+                return FileResponse(path=local_filename, filename=local_filename)
+            elif response.status_code == 404:
+                logger.info(f"there is no file {filename[filename.rfind(os.sep) + 1:]} on CDDIS")
+                return f"there is no file {filename[filename.rfind(os.sep) + 1:]} on CDDIS"
+            else:
+                logger.info(f"there are troubles with getting {filename[filename.rfind(os.sep) + 1:]}, "
+                            f"response code {response.status_code}")
+                return (f"there are troubles with getting {filename[filename.rfind(os.sep) + 1:]}, "
                         f"response code {response.status_code}")
+        except Exception as err:
+            logger.info(f"troubles with getting {filename[filename.rfind(os.sep) + 1:]}, "
+                    "there is no internet connection")
             return (f"there are troubles with getting {filename[filename.rfind(os.sep) + 1:]}, "
-                    f"response code {response.status_code}")
+                    "there is no internet connection")
 
 
 @app.get('/download/last/{n_or_g}')
